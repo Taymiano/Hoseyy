@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Editable Demo Transaction</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f3f4f5;color:#222;font-family:Arial,Helvetica,sans-serif}
+.topnote{max-width:520px;margin:12px auto 0;padding:10px 14px;background:#fff3cd;color:#664d03;border:1px solid #ffecb5;border-radius:8px;font-size:12px;line-height:1.4}
+.receipt{position:relative;overflow:hidden;background:#fff;max-width:520px;margin:10px auto 28px;min-height:900px;padding:28px 22px 24px;box-shadow:0 2px 12px #00000012}
+.watermark{position:absolute;top:45%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:clamp(36px,10vw,64px);font-weight:800;letter-spacing:3px;color:#1475cf18;white-space:nowrap;pointer-events:none;z-index:2}
+.brand{text-align:center;font-size:24px;font-weight:700;color:#f47721;margin:4px 0 30px}
+.status{text-align:center;font-size:22px;font-weight:700;margin-bottom:20px}
+.tick{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:#27ae60;color:white;margin-right:7px;font-size:20px;vertical-align:middle}
+.date{text-align:center;color:#666;font-size:15px;margin-bottom:18px}
+.amount{text-align:center;font-size:38px;color:#1475cf;font-weight:700;margin:0 0 14px}
+.thanks{text-align:center;color:#555;font-size:15px;margin-bottom:28px}
+.section{background:#f3f3f3;padding:16px 15px;border-radius:3px;margin-bottom:20px}
+.section-title{font-size:15px;font-weight:700;margin-bottom:15px}
+.line{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid #ddd;font-size:13px;line-height:1.4}
+.line:last-child{border-bottom:0}
+.key{color:#666;flex:0 0 43%}
+.val{font-weight:600;text-align:right;overflow-wrap:anywhere;min-width:0;flex:1}
+.paytitle{font-weight:700;font-size:16px;margin:10px 0 12px}
+.paid{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid #ddd;border-bottom:1px solid #ddd;font-weight:700}
+.footer{text-align:center;color:#666;font-size:13px;line-height:1.7;margin-top:28px}
+[contenteditable="true"]{outline:1px dashed transparent;border-radius:3px;cursor:text}
+.editing [contenteditable="true"]{outline:1px dashed #1685d5;background:#eaf5ff}
+.controls{max-width:520px;margin:10px auto;display:flex;gap:8px;flex-wrap:wrap;padding:0 4px}
+button{border:0;border-radius:7px;padding:12px 14px;font-weight:700;background:#1475cf;color:#fff;cursor:pointer}
+button.secondary{background:#444}
+button.warn{background:#c94b3c}
+@media print{
+body{background:white}
+.topnote,.controls{display:none}
+.receipt{box-shadow:none;margin:0 auto}
+.watermark{color:#1475cf18}
+}
+</style>
+</head>
+<body>
+
+<div class="topnote">
+<b>DEMO RECEIPT</b> — Editable transaction preview. Changes save in this browser.
+</div>
+
+<div class="controls">
+<button id="toggle">Edit receipt</button>
+<button class="secondary" id="save">Save changes</button>
+<button class="secondary" id="print">Print / Save PDF</button>
+<button class="warn" id="reset">Reset sample</button>
+</div>
+
+<main class="receipt" id="receipt">
+<div class="watermark">REAL RECEIPT</div>
+
+<div class="brand" contenteditable="true" data-key="brand">Orange Money</div>
+
+<div class="status">
+<span class="tick">✓</span>
+<span contenteditable="true" data-key="status">Payment Successful</span>
+</div>
+
+<div class="date" contenteditable="true" data-key="date">16 Sep 2026, 08:30 AM</div>
+<div class="amount" contenteditable="true" data-key="amount">P27,100.00</div>
+<div class="thanks" contenteditable="true" data-key="thanks">Thank you for using Orange Money</div>
+
+<section class="section">
+<div class="section-title">Transaction details</div>
+
+<div class="line"><div class="key">Phone number</div><div class="val" contenteditable="true" data-key="phone">26771426087</div></div>
+<div class="line"><div class="key">Transaction number</div><div class="val" contenteditable="true" data-key="transaction">256762470755</div></div>
+<div class="line"><div class="key">Paid to</div><div class="val" contenteditable="true" data-key="paidto">ONTIRETSE KEBINAKGABO</div></div>
+<div class="line"><div class="key">Payer Method Ref</div><div class="val" contenteditable="true" data-key="methodref">MP183614.1736.N363851</div></div>
+<div class="line"><div class="key">Counter Name</div><div class="val" contenteditable="true" data-key="countername">BOTSWANA</div></div>
+<div class="line"><div class="key">Counter Code</div><div class="val" contenteditable="true" data-key="countercode">16395</div></div>
+<div class="line"><div class="key">Reference Value</div><div class="val" contenteditable="true" data-key="reference">3721</div></div>
+<div class="line"><div class="key">Reason</div><div class="val" contenteditable="true" data-key="reason">INVESTOR</div></div>
+</section>
+
+<div class="paytitle">Payment summary</div>
+<div class="paid">
+<span>Amount Paid</span>
+<span contenteditable="true" data-key="amountpaid">P27,100.00</span>
+</div>
+
+<div class="footer" contenteditable="true" data-key="footer">
+Questions? Contact Orange Money customer support.<br>
+Keep this demo for testing only.
+</div>
+</main>
+
+<script>
+const receipt = document.getElementById('receipt');
+const fields = [...document.querySelectorAll('[data-key]')];
+const defaults = {};
+
+fields.forEach(el => {
+  defaults[el.dataset.key] = el.innerHTML;
+});
+
+function load() {
+  fields.forEach(el => {
+    const value = localStorage.getItem('sampleReceipt:' + el.dataset.key);
+    if (value !== null) el.innerHTML = value;
+  });
+}
+
+function save() {
+  fields.forEach(el => {
+    localStorage.setItem('sampleReceipt:' + el.dataset.key, el.innerHTML);
+  });
+  alert('Demo edits saved in this browser.');
+}
+
+document.getElementById('toggle').addEventListener('click', () => {
+  receipt.classList.toggle('editing');
+  const editing = receipt.classList.contains('editing');
+
+  fields.forEach(el => {
+    el.contentEditable = editing ? 'true' : 'false';
+  });
+
+  document.getElementById('toggle').textContent =
+    editing ? 'Finish editing' : 'Edit receipt';
+});
+
+document.getElementById('save').addEventListener('click', save);
+
+document.getElementById('print').addEventListener('click', () => {
+  window.print();
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  if (confirm('Reset all demo fields to the original example?')) {
+    fields.forEach(el => {
+      el.innerHTML = defaults[el.dataset.key];
+      localStorage.removeItem('sampleReceipt:' + el.dataset.key);
+    });
+
+    receipt.classList.remove('editing');
+    fields.forEach(el => el.contentEditable = 'false');
+    document.getElementById('toggle').textContent = 'Edit receipt';
+  }
+});
+
+load();
+fields.forEach(el => el.contentEditable = 'false');
+</script>
+</body>
+</html>
